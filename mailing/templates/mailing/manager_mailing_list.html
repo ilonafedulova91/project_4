@@ -1,0 +1,126 @@
+{% extends "mailing/base.html" %}
+
+{% block title %}All Mailings{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <h1 class="page-title">All Mailings</h1>
+    <p class="text-muted">
+        Manager view of all mailing campaigns.
+    </p>
+</div>
+
+<div class="row g-4">
+
+    {% for mailing in mailings %}
+
+        <div class="col-md-6 col-xl-4">
+
+            <div class="card h-100">
+
+                <div class="card-body d-flex flex-column">
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <h5 class="card-title mb-0">
+                            {{ mailing.message.subject }}
+                        </h5>
+
+                        {% if mailing.status == "Запущена" %}
+                            <span class="badge bg-success">
+                                {{ mailing.status }}
+                            </span>
+                        {% elif mailing.status == "Создана" %}
+                            <span class="badge bg-secondary">
+                                {{ mailing.status }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-dark">
+                                {{ mailing.status }}
+                            </span>
+                        {% endif %}
+
+                    </div>
+
+                    <p class="small text-muted">
+                        Mailing #{{ mailing.pk }}
+                    </p>
+
+                    <p>
+                        <strong>Owner:</strong>
+                        {{ mailing.owner.username }}
+                    </p>
+
+                    <p>
+                        <strong>Active:</strong>
+
+                        {% if mailing.is_active %}
+                            <span class="text-success">Yes</span>
+                        {% else %}
+                            <span class="text-danger">No</span>
+                        {% endif %}
+                    </p>
+
+                    <div class="mt-auto">
+
+                        <a
+                            href="{% url 'manager_mailing_detail' mailing.pk %}"
+                            class="btn btn-pink btn-sm"
+                        >
+                            View
+                        </a>
+
+                        {% if mailing.is_active %}
+
+                            <form
+                                method="post"
+                                action="{% url 'manager_disable_mailing' mailing.pk %}"
+                                class="d-inline"
+                            >
+                                {% csrf_token %}
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-outline-danger btn-sm"
+                                >
+                                    Disable
+                                </button>
+                            </form>
+
+                        {% else %}
+
+                            <span class="badge bg-light text-danger">
+                                Disabled
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% empty %}
+
+        <div class="col-12">
+
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <h3>No mailings</h3>
+                    <p class="text-muted mb-0">
+                        There are no mailings in the system.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,264 @@
+{% extends "mailing/base.html" %}
+
+{% block title %}
+    Mailing #{{ mailing.pk }}
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title">
+            Mailing #{{ mailing.pk }}
+        </h1>
+        <p class="text-muted mb-0">
+            {{ mailing.message.subject }}
+        </p>
+    </div>
+
+    {% if mailing.status == "Создана" %}
+        <span class="badge bg-secondary fs-6">
+            {{ mailing.status }}
+        </span>
+    {% elif mailing.status == "Запущена" %}
+        <span class="badge bg-success fs-6">
+            {{ mailing.status }}
+        </span>
+    {% else %}
+        <span class="badge bg-dark fs-6">
+            {{ mailing.status }}
+        </span>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+
+    <div class="col-lg-7">
+
+        <div class="card mb-4">
+            <div class="card-body">
+
+                <h4 class="mb-4">Mailing information</h4>
+
+                <p>
+                    <strong>Subject:</strong>
+                    {{ mailing.message.subject }}
+                </p>
+
+                <p>
+                    <strong>Start:</strong>
+                    {{ mailing.start_time }}
+                </p>
+
+                <p>
+                    <strong>End:</strong>
+                    {{ mailing.end_time }}
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    {{ mailing.status }}
+                </p>
+
+                <p>
+                    <strong>Active:</strong>
+
+                    {% if mailing.is_active %}
+                        <span class="text-success">Yes</span>
+                    {% else %}
+                        <span class="text-danger">No</span>
+                    {% endif %}
+                </p>
+
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+
+                <h4 class="mb-3">Message</h4>
+
+                <div class="bg-light p-3 rounded">
+                    {{ mailing.message.body|linebreaks }}
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+
+                <h4 class="mb-3">Recipients</h4>
+
+                {% with recipients=mailing.recipients.all %}
+
+                    {% if recipients %}
+
+                        <div class="list-group">
+
+                            {% for recipient in recipients %}
+
+                                <div class="list-group-item">
+                                    <strong>
+                                        {{ recipient.full_name }}
+                                    </strong>
+
+                                    <br>
+
+                                    <small class="text-muted">
+                                        {{ recipient.email }}
+                                    </small>
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% else %}
+
+                        <p class="text-muted mb-0">
+                            No recipients.
+                        </p>
+
+                    {% endif %}
+
+                {% endwith %}
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-lg-5">
+
+        <div class="card mb-4">
+            <div class="card-body">
+
+                <h4 class="mb-3">Actions</h4>
+
+                <div class="d-grid gap-2">
+
+                    {% if mailing.is_active %}
+
+                        <form
+                            method="post"
+                            action="{% url 'send_mailing' mailing.pk %}"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn btn-pink w-100"
+                            >
+                                ✉ Send mailing
+                            </button>
+                        </form>
+
+                    {% else %}
+
+                        <div class="alert alert-warning mb-0">
+                            This mailing has been disabled by a manager.
+                        </div>
+
+                    {% endif %}
+
+                    <a
+                        href="{% url 'mailing_update' mailing.pk %}"
+                        class="btn btn-outline-secondary"
+                    >
+                        Edit mailing
+                    </a>
+
+                    <a
+                        href="{% url 'mailing_delete_confirm' mailing.pk %}"
+                        class="btn btn-outline-danger"
+                    >
+                        Delete mailing
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+
+                <h4 class="mb-3">Sending attempts</h4>
+
+                {% with attempts=mailing.attempts.all %}
+
+                    {% if attempts %}
+
+                        <div class="table-responsive">
+
+                            <table class="table table-sm align-middle">
+
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    {% for attempt in attempts %}
+
+                                        <tr>
+                                            <td>
+                                                <small>
+                                                    {{ attempt.attempt_time }}
+                                                </small>
+                                            </td>
+
+                                            <td>
+                                                {% if attempt.status == "Успешно" %}
+                                                    <span class="badge bg-success">
+                                                        {{ attempt.status }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">
+                                                        {{ attempt.status }}
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    {% else %}
+
+                        <p class="text-muted mb-0">
+                            No sending attempts yet.
+                        </p>
+
+                    {% endif %}
+
+                {% endwith %}
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="mt-4">
+
+    <a
+        href="{% url 'mailing_list' %}"
+        class="btn btn-outline-secondary"
+    >
+        ← Back to mailings
+    </a>
+
+</div>
+
+{% endblock %}

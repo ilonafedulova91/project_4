@@ -1,0 +1,104 @@
+{% extends "mailing/base.html" %}
+
+{% block title %}
+    Dashboard
+{% endblock %}
+
+{% block content %}
+
+<div class="text-center mb-5">
+    <h1 class="page-title">Mailing Dashboard</h1>
+    <p class="text-muted">
+        Manage your recipients, messages and mailings in one place.
+    </p>
+</div>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-md-4">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Total Mailings</h5>
+                <p class="display-5 fw-bold">
+                    {{ total_mailings }}
+                </p>
+                <a
+                    href="{% url 'mailing_list' %}"
+                    class="btn btn-pink"
+                >
+                    View mailings
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Active Mailings</h5>
+                <p class="display-5 fw-bold">
+                    {{ active_mailings }}
+                </p>
+                <a
+                    href="{% url 'mailing_create' %}"
+                    class="btn btn-pink"
+                >
+                    Create mailing
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Recipients</h5>
+                <p class="display-5 fw-bold">
+                    {{ total_recipients }}
+                </p>
+                <a
+                    href="{% url 'recipient_list' %}"
+                    class="btn btn-pink"
+                >
+                    View recipients
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h3 class="page-title mb-4">
+            Mailing Statistics
+        </h3>
+
+        <div class="row text-center">
+
+            <div class="col-md-4">
+                <h5>Successful Attempts</h5>
+                <p class="display-6 text-success">
+                    {{ successful_attempts }}
+                </p>
+            </div>
+
+            <div class="col-md-4">
+                <h5>Failed Attempts</h5>
+                <p class="display-6 text-danger">
+                    {{ failed_attempts }}
+                </p>
+            </div>
+
+            <div class="col-md-4">
+                <h5>Messages Sent</h5>
+                <p class="display-6">
+                    {{ sent_messages }}
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

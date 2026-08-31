@@ -1,0 +1,115 @@
+{% extends "mailing/base.html" %}
+
+{% block title %}
+    Recipients
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title mb-0">Recipients</h1>
+
+    <a
+        href="{% url 'recipient_create' %}"
+        class="btn btn-pink"
+    >
+        + Add recipient
+    </a>
+</div>
+
+<div class="card">
+
+    <div class="card-body">
+
+        {% if recipients %}
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Comment</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for recipient in recipients %}
+
+                            <tr>
+
+                                <td>
+                                    <a
+                                        href="{% url 'recipient_detail' recipient.pk %}"
+                                        class="fw-semibold text-decoration-none"
+                                    >
+                                        {{ recipient.full_name }}
+                                    </a>
+                                </td>
+
+                                <td>
+                                    {{ recipient.email }}
+                                </td>
+
+                                <td>
+                                    {{ recipient.comment|default:"—" }}
+                                </td>
+
+                                <td class="text-end">
+
+                                    <a
+                                        href="{% url 'recipient_update' recipient.pk %}"
+                                        class="btn btn-sm btn-outline-secondary"
+                                    >
+                                        Edit
+                                    </a>
+
+                                    <a
+                                        href="{% url 'recipient_delete_confirm' recipient.pk %}"
+                                        class="btn btn-sm btn-outline-danger"
+                                    >
+                                        Delete
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="text-center py-5">
+
+                <h4>No recipients yet</h4>
+
+                <p class="text-muted">
+                    Add your first recipient to get started.
+                </p>
+
+                <a
+                    href="{% url 'recipient_create' %}"
+                    class="btn btn-pink"
+                >
+                    Add recipient
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}
