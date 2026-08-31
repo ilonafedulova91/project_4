@@ -1,0 +1,105 @@
+{% extends "mailing/base.html" %}
+
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h1 class="page-title mb-1">Messages</h1>
+        <p class="text-muted mb-0">
+            Manage the email content used in your mailings.
+        </p>
+    </div>
+
+    <a
+        href="{% url 'message_create' %}"
+        class="btn btn-pink"
+    >
+        + Add message
+    </a>
+
+</div>
+
+{% if messages %}
+
+    <div class="row g-4">
+
+        {% for message in messages %}
+
+            <div class="col-md-6 col-xl-4">
+
+                <div class="card h-100">
+
+                    <div class="card-body d-flex flex-column">
+
+                        <h5 class="card-title">
+                            {{ message.subject }}
+                        </h5>
+
+                        <p class="text-muted">
+                            {{ message.body|truncatewords:20 }}
+                        </p>
+
+                        <div class="mt-auto">
+
+                            <a
+                                href="{% url 'message_detail' message.pk %}"
+                                class="btn btn-pink btn-sm"
+                            >
+                                View
+                            </a>
+
+                            <a
+                                href="{% url 'message_update' message.pk %}"
+                                class="btn btn-outline-secondary btn-sm"
+                            >
+                                Edit
+                            </a>
+
+                            <a
+                                href="{% url 'message_delete_confirm' message.pk %}"
+                                class="btn btn-outline-danger btn-sm"
+                            >
+                                Delete
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="card">
+        <div class="card-body text-center py-5">
+
+            <div class="display-4 mb-3">📝</div>
+
+            <h3>No messages yet</h3>
+
+            <p class="text-muted">
+                Create a message that can be used in a mailing.
+            </p>
+
+            <a
+                href="{% url 'message_create' %}"
+                class="btn btn-pink"
+            >
+                Add message
+            </a>
+
+        </div>
+    </div>
+
+{% endif %}
+
+{% endblock %}

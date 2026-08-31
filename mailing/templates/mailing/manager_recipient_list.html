@@ -1,0 +1,89 @@
+{% extends "mailing/base.html" %}
+
+{% block title %}All Recipients{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <h1 class="page-title">All Recipients</h1>
+    <p class="text-muted">
+        Manager view of all recipients in the system.
+    </p>
+</div>
+
+<div class="card">
+
+    <div class="card-body">
+
+        {% if recipients %}
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Owner</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for recipient in recipients %}
+
+                            <tr>
+
+                                <td>
+                                    <a
+                                        href="{% url 'manager_recipient_detail' recipient.pk %}"
+                                        class="fw-semibold text-decoration-none"
+                                    >
+                                        {{ recipient.full_name }}
+                                    </a>
+                                </td>
+
+                                <td>
+                                    {{ recipient.email }}
+                                </td>
+
+                                <td>
+                                    {{ recipient.owner.username }}
+                                </td>
+
+                                <td class="text-end">
+
+                                    <a
+                                        href="{% url 'manager_recipient_detail' recipient.pk %}"
+                                        class="btn btn-sm btn-pink"
+                                    >
+                                        View
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <p class="text-muted">
+                No recipients.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

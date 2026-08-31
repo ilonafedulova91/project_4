@@ -1,0 +1,85 @@
+{% extends "mailing/base.html" %}
+
+{% block title %}
+    {% if object %}Edit Message{% else %}Create Message{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-lg-8">
+
+        <div class="card">
+
+            <div class="card-body p-4">
+
+                <h1 class="page-title mb-4">
+                    {% if object %}
+                        Edit message
+                    {% else %}
+                        Create message
+                    {% endif %}
+                </h1>
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Subject
+                        </label>
+
+                        {{ form.subject }}
+
+                        {% for error in form.subject.errors %}
+                            <div class="text-danger small">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">
+                            Message body
+                        </label>
+
+                        {{ form.body }}
+
+                        {% for error in form.body.errors %}
+                            <div class="text-danger small">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex gap-2">
+
+                        <button
+                            type="submit"
+                            class="btn btn-pink"
+                        >
+                            Save message
+                        </button>
+
+                        <a
+                            href="{% url 'message_list' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
