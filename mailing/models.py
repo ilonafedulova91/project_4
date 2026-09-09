@@ -21,6 +21,10 @@ class Recipient(models.Model):
 
 
 class Message(models.Model):
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="messages"
+    )
+
     subject = models.CharField(max_length=250)
     body = models.TextField()
 

@@ -5,11 +5,17 @@ from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.decorators.cache import cache_control
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
-                                  UpdateView)
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    UpdateView,
+)
+from pygments.lexers import verification
 
 from .forms import MailingForm, MessageForm, RecipientForm, RegistrationForm
 from .models import Mailing, MailingAttempt, Message, Recipient, UserProfile
@@ -107,36 +113,55 @@ class RecipientDeleteView(LoginRequiredMixin, DeleteView):
         return response
 
 
-class MessageListView(ListView):
+class MessageListView(LoginRequiredMixin, ListView):
     model = Message
     template_name = "mailing/message_list.html"
     context_object_name = "messages"
 
+    def get_queryset(self):
+        return Message.objects.filter(owner=self.request.user)
 
-class MessageDetailView(DetailView):
+
+class MessageDetailView(LoginRequiredMixin, DetailView):
     model = Message
     template_name = "mailing/message_detail.html"
     context_object_name = "message"
 
+    def get_queryset(self):
+        return Message.objects.filter(owner=self.request.user)
 
-class MessageCreateView(CreateView):
+
+class MessageCreateView(LoginRequiredMixin, CreateView):
     model = Message
     form_class = MessageForm
     template_name = "mailing/message_form.html"
     success_url = reverse_lazy("message_list")
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
-class MessageUpdateView(UpdateView):
+    def get_queryset(self):
+        return Message.objects.filter(owner=self.request.user)
+
+
+class MessageUpdateView(LoginRequiredMixin, UpdateView):
     model = Message
     form_class = MessageForm
     template_name = "mailing/message_form.html"
     success_url = reverse_lazy("message_list")
 
+    def get_queryset(self):
+        return Message.objects.filter(owner=self.request.user)
 
-class MessageDeleteView(DeleteView):
+
+class MessageDeleteView(LoginRequiredMixin, DeleteView):
     model = Message
     template_name = "mailing/message_delete_confirm.html"
     success_url = reverse_lazy("message_list")
+
+    def get_queryset(self):
+        return Message.objects.filter(owner=self.request.user)
 
 
 class ManagerMailingListView(LoginRequiredMixin, ManagerRequiredMixin, ListView):
@@ -273,12 +298,12 @@ def home(request):
 
     user_mailings = Mailing.objects.filter(owner=request.user)
 
-    for mailing in Mailing.objects.all():
+    for mailing in user_mailings:
         mailing.update_status()
 
-    total_mailing = Mailing.objects.count()
+    total_mailings = user_mailings.count()
 
-    active_mailings = Mailing.objects.filter(
+    active_mailings = user_mailings.filter(
         start_time__lte=now, end_time__gte=now, status=Mailing.STATUS_STARTED
     ).count()
 
@@ -292,15 +317,13 @@ def home(request):
         mailing__owner=request.user, status=MailingAttempt.STATUS_FAILED
     ).count()
 
-    send_message = successful_attempts
-
     context = {
-        "total_mailing": total_mailing,
+        "total_mailings": total_mailings,
         "active_mailings": active_mailings,
         "total_recipients": total_recipients,
         "successful_attempts": successful_attempts,
         "failed_attempts": failed_attempts,
-        "send_message": send_message,
+        "sent_messages": successful_attempts,
     }
 
     cache.set(cache_key, context, timeout=60)
@@ -316,15 +339,24 @@ def register(request):
         form = RegistrationForm(request.POST)
 
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
 
             profile = UserProfile.objects.create(user=user, email_verified=False)
+
+            verification_url = request.build_absolute_uri(
+                reverse(
+                    "verify_email",
+                    kwargs={"token": profile.verification_token},
+                )
+            )
 
             send_mail(
                 subject="Подтверждение регистрации",
                 message=(
                     "Для подтверждения регистрации перейдите по ссылке:\n\n"
-                    f"http://127.0.0.1:8000/verify/{profile.verification_token}/"
+                    f"{verification_url}"
                 ),
                 from_email=None,
                 recipient_list=[user.email],
@@ -348,6 +380,9 @@ def verify_email(request, token):
 
     profile.email_verified = True
     profile.save(update_fields=["email_verified"])
+
+    profile.user.is_active = True
+    profile.user.save(update_fields=["is_active"])
 
     return redirect("login")
 
@@ -376,7 +411,11 @@ def manager_block_user(request, pk):
         return redirect("manager_user_list")
 
     profile.is_blocked = True
+    profile.user.is_active = False
+    profile.user.save(update_fields=["is_active"])
     profile.save(update_fields=["is_blocked"])
+
+    invalidate_home_cache(profile.user_id)
 
     messages.success(request, f"Пользователь {profile.user.username} заблокирован.")
 

@@ -33,6 +33,8 @@ class MailingForm(forms.ModelForm):
         if user is not None:
             self.fields["recipients"].queryset = Recipient.objects.filter(owner=user)
 
+            self.fields["message"].queryset = Message.objects.filter(owner=user)
+
     def clean(self):
         cleaned_data = super().clean()
 
@@ -62,3 +64,20 @@ class RegistrationForm(UserCreationForm):
             raise forms.ValidationError("Пользователь с таким email уже существует.")
 
         return email
+
+
+class CustomAuthenticationForm(AuthenticationForm):
+    def confirm_login_allowed(self, user):
+        super().confirm_login_allowed(user)
+
+        if not hasattr(user, "profile") or not user.profile.email_verified:
+            raise forms.ValidationError(
+                "Сначала подтвердите свой email.",
+                code="email_not_verified",
+            )
+
+        if user.profile.is_blocked:
+            raise forms.ValidationError(
+                "Ваш аккаунт заблокирован.",
+                code="user_blocked",
+            )
