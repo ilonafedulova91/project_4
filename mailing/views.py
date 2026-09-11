@@ -15,7 +15,6 @@ from django.views.generic import (
     ListView,
     UpdateView,
 )
-from pygments.lexers import verification
 
 from .forms import MailingForm, MessageForm, RecipientForm, RegistrationForm
 from .models import Mailing, MailingAttempt, Message, Recipient, UserProfile
