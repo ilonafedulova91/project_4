@@ -1,0 +1,135 @@
+{% extends "mailing/base.html" %}
+
+{% block title %}Mailings{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title mb-1">My Mailings</h1>
+        <p class="text-muted mb-0">
+            Create and manage your email campaigns.
+        </p>
+    </div>
+
+    <a href="{% url 'mailing_create' %}" class="btn btn-pink">
+        + Create mailing
+    </a>
+</div>
+
+{% if mailings %}
+
+    <div class="row g-4">
+
+        {% for mailing in mailings %}
+
+            <div class="col-md-6 col-xl-4">
+
+                <div class="card h-100">
+
+                    <div class="card-body d-flex flex-column">
+
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+
+                            <h5 class="card-title mb-0">
+                                {{ mailing.message.subject }}
+                            </h5>
+
+                            {% if mailing.status == "Создана" %}
+                                <span class="badge bg-secondary">
+                                    {{ mailing.status }}
+                                </span>
+                            {% elif mailing.status == "Запущена" %}
+                                <span class="badge bg-success">
+                                    {{ mailing.status }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-dark">
+                                    {{ mailing.status }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <p class="text-muted small mb-2">
+                            Mailing #{{ mailing.pk }}
+                        </p>
+
+                        <p class="mb-1">
+                            <strong>Start:</strong>
+                            {{ mailing.start_time }}
+                        </p>
+
+                        <p class="mb-3">
+                            <strong>End:</strong>
+                            {{ mailing.end_time }}
+                        </p>
+
+                        {% if mailing.is_active %}
+                            <span class="badge bg-light text-success mb-3">
+                                Active
+                            </span>
+                        {% else %}
+                            <span class="badge bg-light text-danger mb-3">
+                                Disabled
+                            </span>
+                        {% endif %}
+
+                        <div class="mt-auto">
+
+                            <a
+                                href="{% url 'mailing_detail' mailing.pk %}"
+                                class="btn btn-pink btn-sm"
+                            >
+                                View
+                            </a>
+
+                            <a
+                                href="{% url 'mailing_update' mailing.pk %}"
+                                class="btn btn-outline-secondary btn-sm"
+                            >
+                                Edit
+                            </a>
+
+                            <a
+                                href="{% url 'mailing_delete_confirm' mailing.pk %}"
+                                class="btn btn-outline-danger btn-sm"
+                            >
+                                Delete
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% else %}
+
+    <div class="card">
+        <div class="card-body text-center py-5">
+
+            <div class="display-4 mb-3">💌</div>
+
+            <h3>No mailings yet</h3>
+
+            <p class="text-muted">
+                Create your first mailing campaign.
+            </p>
+
+            <a href="{% url 'mailing_create' %}" class="btn btn-pink">
+                Create mailing
+            </a>
+
+        </div>
+    </div>
+
+{% endif %}
+
+{% endblock %}

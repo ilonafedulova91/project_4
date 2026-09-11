@@ -1,0 +1,238 @@
+{% extends "mailing/base.html" %}
+
+{% block title %}Mailing #{{ mailing.pk }}{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+
+    <span class="badge bg-light text-dark mb-2">
+        Manager view
+    </span>
+
+    <h1 class="page-title">
+        Mailing #{{ mailing.pk }}
+    </h1>
+
+</div>
+
+<div class="row g-4">
+
+    <div class="col-lg-7">
+
+        <div class="card mb-4">
+
+            <div class="card-body">
+
+                <h4 class="mb-4">
+                    Mailing information
+                </h4>
+
+                <p>
+                    <strong>Subject:</strong>
+                    {{ mailing.message.subject }}
+                </p>
+
+                <p>
+                    <strong>Owner:</strong>
+                    {{ mailing.owner.username }}
+                </p>
+
+                <p>
+                    <strong>Start:</strong>
+                    {{ mailing.start_time }}
+                </p>
+
+                <p>
+                    <strong>End:</strong>
+                    {{ mailing.end_time }}
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    {{ mailing.status }}
+                </p>
+
+                <p>
+                    <strong>Active:</strong>
+
+                    {% if mailing.is_active %}
+                        <span class="text-success">
+                            Yes
+                        </span>
+                    {% else %}
+                        <span class="text-danger">
+                            No
+                        </span>
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="card mb-4">
+
+            <div class="card-body">
+
+                <h4 class="mb-3">
+                    Message
+                </h4>
+
+                <div class="bg-light rounded p-3">
+                    {{ mailing.message.body|linebreaks }}
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <h4 class="mb-3">
+                    Recipients
+                </h4>
+
+                {% with recipients=mailing.recipients.all %}
+
+                    {% if recipients %}
+
+                        <ul class="list-group">
+
+                            {% for recipient in recipients %}
+
+                                <li class="list-group-item">
+
+                                    <strong>
+                                        {{ recipient.full_name }}
+                                    </strong>
+
+                                    <br>
+
+                                    <small class="text-muted">
+                                        {{ recipient.email }}
+                                    </small>
+
+                                </li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                    {% else %}
+
+                        <p class="text-muted mb-0">
+                            No recipients.
+                        </p>
+
+                    {% endif %}
+
+                {% endwith %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-5">
+
+        <div class="card mb-4">
+
+            <div class="card-body">
+
+                <h4 class="mb-3">
+                    Manager actions
+                </h4>
+
+                {% if mailing.is_active %}
+
+                    <form
+                        method="post"
+                        action="{% url 'manager_disable_mailing' mailing.pk %}"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger w-100"
+                        >
+                            Disable mailing
+                        </button>
+                    </form>
+
+                {% else %}
+
+                    <div class="alert alert-warning mb-0">
+                        This mailing is disabled.
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <h4 class="mb-3">
+                    Sending attempts
+                </h4>
+
+                {% with attempts=mailing.attempts.all %}
+
+                    {% if attempts %}
+
+                        {% for attempt in attempts %}
+
+                            <div class="border-bottom py-2">
+
+                                <div>
+                                    <strong>
+                                        {{ attempt.status }}
+                                    </strong>
+                                </div>
+
+                                <small class="text-muted">
+                                    {{ attempt.attempt_time }}
+                                </small>
+
+                                <div class="small mt-1">
+                                    {{ attempt.server_response }}
+                                </div>
+
+                            </div>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <p class="text-muted mb-0">
+                            No sending attempts yet.
+                        </p>
+
+                    {% endif %}
+
+                {% endwith %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<a
+    href="{% url 'manager_mailing_list' %}"
+    class="btn btn-outline-secondary mt-4"
+>
+    ← Back to mailings
+</a>
+
+{% endblock %}
